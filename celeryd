@@ -3,7 +3,9 @@
 #  celeryd - Starts the Celery worker daemon.
 # ============================================
 #
-# :Usage: /etc/init.d/celeryd {start|stop|force-reload|restart|try-restart|status}
+# :Usage:
+# :/etc/init.d/celeryd {start|stop|restart|replace} [worker-name]"
+# :/etc/init.d/celeryd {restart-workers-graceful|kill|create-paths}"
 # :Configuration file: /etc/default/celeryd
 #
 # See http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html#generic-init-scripts
@@ -73,8 +75,13 @@ CELERYD_NODES=${CELERYD_NODES:-$DEFAULT_NODES}
 
 export CELERY_LOADER
 
-if [ -n "$2" ]; then
-    CELERYD_OPTS="$CELERYD_OPTS $2"
+if [ "$1" = "start" ] || [ "$1" = "stop" ] || [ "$1" = "restart" ] || [ "$1" = "replace" ]; then
+    if [ -n "$2" ]; then
+        CELERYD_NODES=$2
+    else
+        echo "No worker-name given."
+        exit 1
+    fi
 fi
 
 CELERYD_LOG_DIR=`dirname $CELERYD_LOG_FILE`
@@ -181,7 +188,8 @@ _get_worker_pids() {
 
 
 stop_workers () {
-    $CELERYD_MULTI stopwait $CELERYD_NODES --pidfile="$CELERYD_PID_FILE"
+#    $CELERYD_MULTI stopwait $CELERYD_NODES --pidfile="$CELERYD_PID_FILE"
+    $CELERYD_MULTI stop $CELERYD_NODES --pidfile="$CELERYD_PID_FILE"
 }
 
 
@@ -251,6 +259,20 @@ check_status () {
 }
 
 
+replace_workers () {
+    local pid_files=
+    pid_files=`_get_pid_files`
+    start_workers
+
+    local one_failed=
+    for pid_file in $pid_files; do
+        local node=`basename "$pid_file" .pid`
+        local nodename=`echo $node | awk -F"." '{print $2}'`
+        $CELERYD_MULTI stop $nodename --pidfile="$CELERYD_PID_FILE"
+    done
+}
+
+
 case "$1" in
     start)
         check_dev_null
@@ -298,8 +320,14 @@ case "$1" in
         check_dev_null
         check_paths
     ;;
+
+    replace)
+        replace_workers
+    ;;
     *)
-        echo "Usage: /etc/init.d/${SCRIPT_NAME} {start|stop|restart|restart-workers-graceful|kill|create-paths}"
+        echo "Usage:"
+        echo "/etc/init.d/${SCRIPT_NAME} {start|stop|restart|replace} [worker-name]"
+        echo "/etc/init.d/${SCRIPT_NAME} {restart-workers-graceful|kill|create-paths}"
         exit 64  # EX_USAGE
     ;;
 esac
