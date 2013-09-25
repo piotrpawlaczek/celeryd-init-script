@@ -3,19 +3,26 @@ celeryd-init-script
 
 Celery init script with replace option.
 
-Usage:
+Usage
+=====
 
 /etc/init.d/celeryd {start|stop|restart|replace} [worker-name]"
 /etc/init.d/celeryd {restart-workers-graceful|kill|create-paths}"
 
 Configuration file: /etc/default/celeryd
 
+Info
+====
+
 Original code: https://github.com/celery/celery/blob/master/extra/generic-init.d/celeryd
 See http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html#generic-init-scripts
 
+Implementation
+==============
+
 To implement separate init scripts, do NOT copy this script.  Instead, symlink it.  I.e., if my new application, "little-worker" needs an init, I should just use:
 
-# ln -s /etc/init.d/celeryd /etc/init.d/little-worker
+ln -s /etc/init.d/celeryd /etc/init.d/little-worker
 
 You can then configure this by manipulating /etc/default/little-worker.
 
