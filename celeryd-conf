@@ -1,0 +1,31 @@
+# Place this conf file in /etc/default
+
+# Project tag for log and pid file
+PROJECTTAG="celeryd_multi"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/path/to/django_prject"
+
+# Python interpreter from environment
+ENV_PYTHON="/path/to/virtualenv/bin/python"
+
+# How to call "manage.py celeryd_multi"
+CELERYD_MULTI="$ENV_PYTHON $CELERYD_CHDIR/manage.py celeryd_multi"
+
+# How to call "manage.py celeryctl"
+CELERYCTL="$ENV_PYTHON $CELERYD_CHDIR/manage.py celeryctl"
+
+# Extra arguments to celeryd
+CELERYD_OPTS="--time-limit=300 --concurrency=4"
+
+# %n will be replaced with the nodename.
+#CELERYD_LOG_FILE="/var/log/celery/%n.log"
+CELERYD_LOG_FILE="/path/to/log/$PROJECTTAG.%n.log"
+CELERYD_PID_FILE="/path/to/run/celery/$PROJECTTAG.%n.pid"
+
+# Workers should run as an unprivileged user.
+CELERYD_USER="user"
+CELERYD_GROUP="group"
+
+# Name of the projects settings module.
+export DJANGO_SETTINGS_MODULE="project.settings"
