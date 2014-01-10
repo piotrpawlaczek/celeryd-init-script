@@ -29,3 +29,6 @@ CELERYD_GROUP="group"
 
 # Name of the projects settings module.
 export DJANGO_SETTINGS_MODULE="project.settings"
+
+# The queues the workers should work on (comma-separated, empty for all queues)
+CELERYD_QUEUES=""
